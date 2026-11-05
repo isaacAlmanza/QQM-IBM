@@ -292,9 +292,17 @@
     let hasVotedForCurrentToken = false;
     const letters = ["A", "B", "C", "D"];
 
+    function getApiEndpoint(action) {
+      const isVercel = window.location.hostname.includes('vercel.app');
+      if (isVercel) {
+        return `api/audience?action=${encodeURIComponent(action)}`;
+      }
+      return `audience_api.php?action=${encodeURIComponent(action)}`;
+    }
+
     async function checkStatus() {
       try {
-        const res = await fetch('audience_api.php?action=status');
+        const res = await fetch(getApiEndpoint('status'));
         const json = await res.json();
 
         if (json.success && json.data.active) {
@@ -343,7 +351,7 @@
       if (!currentToken || hasVotedForCurrentToken) return;
 
       try {
-        const res = await fetch('audience_api.php?action=vote', {
+        const res = await fetch(getApiEndpoint('vote'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ option: optionIndex, token: currentToken })

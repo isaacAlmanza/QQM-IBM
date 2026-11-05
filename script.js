@@ -416,8 +416,13 @@ class MillionaireGame {
       themeIconGame: document.getElementById('theme-icon-game')
     };
 
-    // Almacenamiento de URL personalizada de ngrok
-    this.customPublicUrl = localStorage.getItem("qqm_custom_url") || "";
+    // Almacenamiento de URL personalizada de ngrok / hosting web
+    let savedUrl = localStorage.getItem("qqm_custom_url") || "";
+    if (savedUrl && (window.location.hostname.includes('vercel.app') || savedUrl.includes('vercel.app')) && savedUrl.endsWith('/QQM')) {
+      savedUrl = savedUrl.replace(/\/QQM$/, '');
+      try { localStorage.setItem("qqm_custom_url", savedUrl); } catch(e) {}
+    }
+    this.customPublicUrl = savedUrl;
     this.audiencePollInterval = null;
     this.audienceCountdownInterval = null;
     this.audienceTotalSeconds = AUDIENCE_TIMER_SECONDS;
@@ -615,10 +620,17 @@ class MillionaireGame {
       });
     }
 
-    // Configuración de URL pública (ngrok)
+    // Configuración de URL pública (ngrok / Vercel / Web)
     const openNgrokModal = () => {
       if (this.dom.inputCustomUrl) {
-        this.dom.inputCustomUrl.value = this.customPublicUrl;
+        let val = this.customPublicUrl;
+        if (val && (window.location.hostname.includes('vercel.app') || val.includes('vercel.app')) && val.endsWith('/QQM')) {
+          val = val.replace(/\/QQM$/, '');
+        }
+        if (!val && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+          val = window.location.origin;
+        }
+        this.dom.inputCustomUrl.value = val || '';
       }
       this.openModal(this.dom.modalNgrok);
     };
@@ -639,24 +651,20 @@ class MillionaireGame {
           if (!val.startsWith('http://') && !val.startsWith('https://')) {
             val = 'https://' + val;
           }
-          // Quitar barra final si la tiene
           if (val.endsWith('/')) val = val.slice(0, -1);
+          if (val.endsWith('/vote.html')) val = val.replace('/vote.html', '');
 
-          // Si el usuario puso sólo el dominio de ngrok sin /QQM, lo añadimos automáticamente
-          try {
-            const parsed = new URL(val);
-            if (!parsed.pathname || parsed.pathname === '/' || parsed.pathname === '') {
-              val = `${parsed.origin}/QQM`;
-            } else if (parsed.pathname.endsWith('/vote.html')) {
-              val = val.replace('/vote.html', '');
-            }
-          } catch(e) {}
+          // Si el usuario guardó o pegó una URL con /QQM en Vercel, quitarlo
+          if ((window.location.hostname.includes('vercel.app') || val.includes('vercel.app')) && val.endsWith('/QQM')) {
+            val = val.replace(/\/QQM$/, '');
+          }
         }
 
         this.customPublicUrl = val;
         localStorage.setItem("qqm_custom_url", val);
         this.closeModal(this.dom.modalNgrok);
-        alert(val ? `¡URL pública configurada!\nEl código QR ahora apuntará a:\n${val}/vote.html` : "Se ha restablecido la dirección a la IP local por defecto.");
+        const resolved = this.getVoteUrl();
+        alert(val ? `¡URL pública configurada!\nEl código QR ahora apuntará a:\n${resolved}` : `Se ha restablecido la dirección automática:\n${resolved}`);
       });
     }
 
@@ -1042,27 +1050,7 @@ class MillionaireGame {
     this.stopTimer();
 
     // 2. Determinar la URL para escanear
-    // Si el usuario configuró ngrok o un dominio público, se usa directamente
-    let voteUrl = "";
-    if (this.customPublicUrl) {
-      let base = this.customPublicUrl.trim();
-      if (base.endsWith('/')) base = base.slice(0, -1);
-      if (base.endsWith('/vote.html')) base = base.replace('/vote.html', '');
-      
-      // Si la URL de ngrok no tiene /QQM, añadirlo automáticamente porque Laragon sirve desde www/QQM
-      if (!base.endsWith('/QQM') && !base.includes('/QQM/')) {
-        base = `${base}/QQM`;
-      }
-      voteUrl = `${base}/vote.html`;
-    } else {
-      const currentHost = window.location.host;
-      let voteUrlHost = currentHost;
-      if (currentHost.includes('localhost') || currentHost.includes('127.0.0.1')) {
-        voteUrlHost = '192.168.1.107' + (window.location.port ? ':' + window.location.port : '');
-      }
-      voteUrl = `${window.location.protocol}//${voteUrlHost}${window.location.pathname.replace('index.html', '')}vote.html`;
-    }
-
+    const voteUrl = this.getVoteUrl();
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(voteUrl)}`;
 
     if (this.dom.audienceQrImg) this.dom.audienceQrImg.src = qrApiUrl;
@@ -1087,8 +1075,8 @@ class MillionaireGame {
 
     this.openModal(this.dom.modalAudience);
 
-    // 4. Iniciar sesión en backend PHP
-    fetch('audience_api.php?action=start', {
+    // 4. Iniciar sesión en backend (Vercel Node.js serverless / Local PHP)
+    fetch(this.getAudienceApiUrl('start'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1104,8 +1092,47 @@ class MillionaireGame {
     }, 1500);
   }
 
+  getAudienceApiUrl(action) {
+    const isVercel = window.location.hostname.includes('vercel.app');
+    if (isVercel) {
+      return `api/audience?action=${encodeURIComponent(action)}`;
+    }
+    return `audience_api.php?action=${encodeURIComponent(action)}`;
+  }
+
+  getVoteUrl() {
+    if (this.customPublicUrl) {
+      let base = this.customPublicUrl.trim();
+      if (base.endsWith('/')) base = base.slice(0, -1);
+      if (base.endsWith('/vote.html')) base = base.replace('/vote.html', '');
+
+      // En Vercel no debe llevar /QQM
+      if (base.includes('vercel.app')) {
+        base = base.replace(/\/QQM\/?$/, '');
+        return `${base}/vote.html`;
+      }
+
+      // Si es ngrok apuntando a Laragon (donde Apache sirve desde root www y QQM está en subcarpeta)
+      if (base.includes('ngrok') && !base.endsWith('/QQM') && !base.includes('/QQM/')) {
+        base = `${base}/QQM`;
+      }
+      return `${base}/vote.html`;
+    }
+
+    // Si estamos en Vercel o en un servidor público
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocal) {
+      // Resuelve automáticamente https://dominio/.../vote.html según la ruta actual
+      return new URL('vote.html', window.location.href).href;
+    }
+
+    // Si es local (Laragon), usar la IP de la red local
+    let voteUrlHost = '192.168.1.107' + (window.location.port ? ':' + window.location.port : '');
+    return `${window.location.protocol}//${voteUrlHost}${window.location.pathname.replace('index.html', '')}vote.html`;
+  }
+
   pollAudienceVotes() {
-    fetch('audience_api.php?action=status')
+    fetch(this.getAudienceApiUrl('status'))
       .then(res => res.json())
       .then(json => {
         if (!json.success || !json.data) return;
@@ -1162,7 +1189,7 @@ class MillionaireGame {
         clearInterval(this.audienceCountdownInterval);
         this.audienceCountdownInterval = null;
       }
-      fetch('audience_api.php?action=close').catch(() => {});
+      fetch(this.getAudienceApiUrl('close')).catch(() => {});
 
       // Bono de tiempo: reactivar reloj del participante con 45 segundos completos para deliberar
       this.timeLeft = Math.max(this.timeLeft, TIMER_START_SECONDS);
