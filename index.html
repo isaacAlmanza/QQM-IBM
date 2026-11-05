@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Quién Quiere Ser Millonario? - Edición Bíblica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="stars-bg"></div>
+  
+  <!-- ==================== HOME / MENÚ PRINCIPAL ==================== -->
+  <div class="home-container" id="home-view">
+    <div class="home-card">
+      <div class="home-hero">
+        <div class="home-logo-box">
+          <img src="logo.png" alt="Instituto Bíblico Ministerial" class="home-logo-img">
+        </div>
+        <h1 class="home-title">¿QUIÉN QUIERE SER MILLONARIO?</h1>
+        <h2 class="home-subtitle">EDICIÓN BÍBLICA • INSTITUTO BÍBLICO MINISTERIAL</h2>
+        <p class="home-motto">“Hablando con denuedo la Palabra de Dios”</p>
+        <p class="home-desc">Pon a prueba tu sabiduría en las Sagradas Escrituras a través de 15 preguntas de dificultad progresiva con 2 comodines bíblicos.</p>
+      </div>
+
+      <!-- BOTONES PRINCIPALES DE ACCIÓN -->
+      <div class="home-actions">
+        <button class="btn-start-game" id="btn-start-game">
+          <span class="btn-icon">▶</span>
+          <span class="btn-text">INICIAR PARTIDA</span>
+        </button>
+        <button class="btn-ngrok-setup" id="btn-ngrok-setup" title="Configurar URL pública (ej. ngrok) para que el público vote desde cualquier internet">
+          <span>🌐 URL Pública</span>
+        </button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle-home" title="Cambiar Tema (Claro / Oscuro)">
+          <span class="theme-icon" id="theme-icon-home">☀️</span>
+          <span class="theme-text" id="theme-text-home">Modo Claro</span>
+        </button>
+      </div>
+
+      <!-- RESUMEN DE ESTADÍSTICAS -->
+      <div class="home-stats-grid">
+        <div class="stat-card">
+          <span class="stat-num" id="stat-total-games">0</span>
+          <span class="stat-label">Partidas Jugadas</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="stat-max-prize">$0</span>
+          <span class="stat-label">Récord / Premio Máximo</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="stat-million-count">0</span>
+          <span class="stat-label">Victorias del Millón</span>
+        </div>
+      </div>
+
+      <!-- PESTAÑAS / SECCIONES: HISTORIAL E INSTRUCCIONES -->
+      <div class="home-details-box">
+        <div class="home-tabs">
+          <button class="tab-btn active" id="tab-history-btn">📜 Partidas Anteriores</button>
+          <button class="tab-btn" id="tab-rules-btn">📖 Reglas y Comodines</button>
+        </div>
+
+        <!-- PANEL HISTORIAL -->
+        <div class="tab-pane active" id="pane-history">
+          <div class="history-list-wrapper">
+            <ul class="history-list" id="history-list">
+              <li class="history-empty">Aún no has jugado ninguna partida. ¡Inicia una ahora y pon tu conocimiento a prueba!</li>
+            </ul>
+          </div>
+          <div class="history-actions" id="history-actions-row" style="display: none;">
+            <button class="btn-clear-history" id="btn-clear-history">Borrar Historial</button>
+          </div>
+        </div>
+
+        <!-- PANEL REGLAS E INFORMACIÓN -->
+        <div class="tab-pane" id="pane-rules">
+          <div class="rules-content">
+            <div class="rule-item">
+              <strong>⏳ 45 Segundos por Pregunta:</strong> Tiempo prudencial para meditar y responder.
+            </div>
+            <div class="rule-item">
+              <strong>★ Zonas de Confort / Pisos Seguros:</strong> Al superar la pregunta 5 ($1,000) y la 10 ($32,000), ese dinero queda 100% asegurado.
+            </div>
+            <div class="rule-item">
+              <strong>🛠️ 2 Comodines Bíblicos:</strong>
+              <ul>
+                <li><strong>50:50:</strong> Oculta 2 opciones erróneas al azar.</li>
+                <li><strong>Ayuda del Público (QR en Vivo):</strong> Los asistentes escanean el código QR y votan en tiempo real desde su móvil con 90 segundos para participar.</li>
+              </ul>
+            </div>
+            <div class="rule-item">
+              <strong>🏳️ Opción de Retiro:</strong> En cualquier momento puedes retirarte y marcharte con el dinero ganado en la ronda anterior.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TABLERO DE JUEGO ==================== -->
+  <div class="game-container" id="game-view" style="display: none;">
+    <!-- PANEL PRINCIPAL (IZQUIERDA / CENTRO) -->
+    <main class="main-panel">
+      <!-- HEADER CON LOGO Y ESTADO -->
+      <header class="game-header">
+        <div class="logo-badge">
+          <img src="logo.png" alt="Instituto Bíblico Ministerial" class="header-logo-img">
+          <div class="logo-titles">
+            <h1>¿QUIÉN QUIERE SER MILLONARIO?</h1>
+            <span class="sub-edition">EDICIÓN BÍBLICA • INSTITUTO BÍBLICO MINISTERIAL</span>
+          </div>
+        </div>
+
+        <!-- CONTROLES Y COMODINES -->
+        <div class="lifelines-container" id="lifelines-container">
+          <button class="sound-toggle-btn" id="btn-leave-game" title="Salir al Menú Principal">
+            <span>🏠</span>
+          </button>
+          <button class="sound-toggle-btn" id="btn-config-url" title="Configurar URL Pública (ngrok)">
+            <span>🌐</span>
+          </button>
+          <button class="sound-toggle-btn" id="btn-toggle-theme" title="Cambiar Tema (Claro / Oscuro)">
+            <span id="theme-icon-game">☀️</span>
+          </button>
+          <button class="sound-toggle-btn" id="btn-toggle-sound" title="Activar/Silenciar efectos y música">
+            <span id="sound-icon">🔊</span>
+          </button>
+          <button class="lifeline-btn" id="btn-5050" title="Comodín 50:50 (Elimina 2 incorrectas)">
+            <span class="lifeline-icon">50:50</span>
+            <span class="lifeline-label">50:50</span>
+          </button>
+          <button class="lifeline-btn" id="btn-audience" title="Ayuda del público (Votación QR en vivo)">
+            <span class="lifeline-icon">👥</span>
+            <span class="lifeline-label">Público (QR)</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- BARRA DE INFORMACIÓN Y TEMPORIZADOR -->
+      <section class="game-status-bar">
+        <div class="status-box current-prize-box">
+          <span class="label">Premio en juego:</span>
+          <span class="value" id="current-prize-val">$100</span>
+        </div>
+
+        <!-- TEMPORIZADOR CIRCULAR -->
+        <div class="timer-wrapper">
+          <div class="timer-circle" id="timer-circle">
+            <span id="timer-seconds">45</span>
+          </div>
+          <span class="timer-label">SEG</span>
+        </div>
+
+        <div class="status-box safe-prize-box">
+          <span class="label">Piso Seguro:</span>
+          <span class="value" id="safe-prize-val">$0</span>
+        </div>
+      </section>
+
+      <!-- ÁREA DE PREGUNTA Y RESPUESTAS (ESTILO TV SHOW) -->
+      <section class="trivia-area">
+        <div class="question-box-wrapper">
+          <div class="hex-border"></div>
+          <div class="question-box">
+            <span class="question-number" id="question-number">Pregunta 1 de 15</span>
+            <p id="question-text">Cargando pregunta...</p>
+          </div>
+        </div>
+
+        <div class="options-grid" id="options-grid">
+          <!-- Opciones A, B, C, D -->
+          <button class="option-btn" data-index="0">
+            <span class="opt-letter">A:</span>
+            <span class="opt-text">Opción A</span>
+          </button>
+          <button class="option-btn" data-index="1">
+            <span class="opt-letter">B:</span>
+            <span class="opt-text">Opción B</span>
+          </button>
+          <button class="option-btn" data-index="2">
+            <span class="opt-letter">C:</span>
+            <span class="opt-text">Opción C</span>
+          </button>
+          <button class="option-btn" data-index="3">
+            <span class="opt-letter">D:</span>
+            <span class="opt-text">Opción D</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- BOTÓN RETIRARSE / MENSAJES -->
+      <footer class="game-footer">
+        <button id="btn-retire" class="retire-btn" title="Plantarse y llevarse el dinero actual">
+          🏳️ Retirarse con el premio acumulado
+        </button>
+      </footer>
+    </main>
+
+    <!-- PANEL LATERAL: PIRÁMIDE DE PREMIOS -->
+    <aside class="sidebar-panel">
+      <div class="sidebar-header">
+        <h3>ESCALA DE PREMIOS</h3>
+      </div>
+      <ol class="prize-ladder" id="prize-ladder">
+        <!-- Generado dinámicamente o estructurado de 15 a 1 -->
+      </ol>
+      <div class="ladder-legend">
+        <span class="legend-item"><span class="badge safe">★</span> Seguro (Nivel 5 y 10)</span>
+      </div>
+    </aside>
+  </div>
+
+  <!-- MODALES DE COMODINES Y FIN DE JUEGO -->
+
+  <!-- Modal Ayuda del público (Con QR en tiempo real y tiempo de votación) -->
+  <div class="modal-overlay" id="modal-audience">
+    <div class="modal-card audience-card">
+      <div class="modal-header">
+        <span class="modal-icon">👥</span>
+        <h3>Votación de la Audiencia en Vivo</h3>
+      </div>
+      <div class="modal-body audience-modal-body">
+        <!-- CRONÓMETRO DE LA AUDIENCIA -->
+        <div class="audience-timer-banner">
+          <div class="audience-timer-info">
+            <span>⏱️ Tiempo para escanear y votar:</span>
+            <strong id="audience-timer-sec">1:30 (90s)</strong>
+          </div>
+          <div class="audience-timer-progress">
+            <div class="audience-timer-bar" id="audience-timer-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN QR Y ENLACE -->
+        <div class="qr-voting-box">
+          <div class="qr-image-wrapper">
+            <img id="audience-qr-img" src="" alt="Código QR para votar">
+          </div>
+          <div class="qr-instructions">
+            <strong>¡Escanea con tu celular para votar!</strong>
+            <p>Abre la cámara de tu teléfono para ingresar y apoyar al concursante en vivo.</p>
+            <span class="qr-link-text" id="qr-direct-link">Cargando enlace...</span>
+            <div class="live-vote-counter">
+              <span class="pulse-dot"></span>
+              <span>Votos registrados: <strong id="total-live-votes">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTADOS EN BARRAS -->
+        <div class="audience-chart" id="audience-chart">
+          <!-- Barras de A, B, C, D -->
+          <div class="chart-col">
+            <div class="bar-fill" id="bar-fill-0" style="height: 0%;"></div>
+            <span class="bar-pct" id="bar-pct-0">0%</span>
+            <span class="bar-label">A</span>
+          </div>
+          <div class="chart-col">
+            <div class="bar-fill" id="bar-fill-1" style="height: 0%;"></div>
+            <span class="bar-pct" id="bar-pct-1">0%</span>
+            <span class="bar-label">B</span>
+          </div>
+          <div class="chart-col">
+            <div class="bar-fill" id="bar-fill-2" style="height: 0%;"></div>
+            <span class="bar-pct" id="bar-pct-2">0%</span>
+            <span class="bar-label">C</span>
+          </div>
+          <div class="chart-col">
+            <div class="bar-fill" id="bar-fill-3" style="height: 0%;"></div>
+            <span class="bar-pct" id="bar-pct-3">0%</span>
+            <span class="bar-label">D</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer audience-footer">
+        <small class="timer-bonus-notice">💡 Al cerrar este modal, el participante recibe <strong>+45 segundos adicionales</strong> para responder con calma.</small>
+        <button class="modal-close-btn" id="close-audience-modal">Continuar Partida</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Configuración de URL Pública (ngrok) -->
+  <div class="modal-overlay" id="modal-ngrok">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">🌐</span>
+        <h3>Configurar URL Pública (ngrok)</h3>
+      </div>
+      <div class="modal-body ngrok-modal-body">
+        <p class="ngrok-desc">Si el público no está en tu misma red Wi-Fi, puedes ingresar tu URL pública de <strong>ngrok</strong> (o tu dominio web) para que el código QR apunte directamente a ella:</p>
+        
+        <div class="input-group">
+          <label for="input-custom-url">URL Pública del Servidor:</label>
+          <input type="url" id="input-custom-url" placeholder="Ej: https://abc-123.ngrok-free.app/QQM" autocomplete="off">
+        </div>
+        
+        <div class="ngrok-help-box">
+          <small>💡 <strong>Ejemplo con ngrok:</strong> Ejecuta en tu terminal <code>ngrok http 80</code> y pega aquí la URL generada (ej. <code>https://xxxx.ngrok-free.app/QQM</code>). Deja vacío para usar tu IP local por defecto.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-ngrok" id="btn-cancel-ngrok">Cancelar</button>
+        <button class="modal-close-btn" id="btn-save-ngrok">Guardar URL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ficha Educativa: Cita Bíblica y Contexto Teológico -->
+  <div class="modal-overlay" id="modal-explanation">
+    <div class="modal-card explanation-card">
+      <div class="modal-header explanation-header" id="explanation-header">
+        <span class="modal-icon" id="explanation-icon">📖</span>
+        <h3 id="explanation-title">Contexto Bíblico & Teológico</h3>
+      </div>
+      <div class="modal-body explanation-modal-body">
+        <div class="explanation-badge-tag" id="explanation-badge">
+          <span class="exp-tag-icon">✨</span>
+          <span id="explanation-status-text">¡Respuesta Correcta!</span>
+        </div>
+
+        <div class="explanation-verse-card">
+          <div class="verse-icon-col">📜</div>
+          <div class="verse-text-col">
+            <h4 id="explanation-citation">Génesis 1:1</h4>
+            <p id="explanation-body">Cargando contexto bíblico...</p>
+          </div>
+        </div>
+
+        <div class="explanation-countdown-bar">
+          <span id="exp-auto-text">Avanzando automáticamente en <strong>5s</strong> o pulsa Continuar</span>
+        </div>
+      </div>
+      <div class="modal-footer explanation-footer">
+        <button class="modal-close-btn btn-exp-next" id="btn-explanation-next">Siguiente Pregunta ➡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Fin de Juego / Ganador / Retiro -->
+  <div class="modal-overlay" id="modal-gameover">
+    <div class="modal-card gameover-card">
+      <div class="modal-header">
+        <span class="modal-icon" id="gameover-icon">🏆</span>
+        <h3 id="gameover-title">¡Fin de la partida!</h3>
+      </div>
+      <div class="modal-body gameover-body">
+        <p id="gameover-msg">Has completado el desafío.</p>
+        <div class="prize-award-badge">
+          <span>Premio obtenido:</span>
+          <strong id="gameover-prize">$0</strong>
+        </div>
+        <p class="gameover-detail" id="gameover-detail"></p>
+      </div>
+      <div class="modal-footer gameover-footer">
+        <button class="btn-home-return" id="btn-home-return">🏠 Menú Principal</button>
+        <button class="btn-play-again" id="btn-play-again">Jugar de Nuevo 🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio sintetizado con Web Audio API (no requiere archivos externos) -->
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

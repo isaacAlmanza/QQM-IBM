@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Votación del Público - ¿Quién Quiere Ser Millonario?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a1124;
+      --panel-bg: rgba(14, 24, 52, 0.95);
+      --gold-primary: #ecaa13;
+      --gold-amber: #efa542;
+      --accent-cyan: #3b82f6;
+      --text-light: #f5f8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #182852 0%, #0d1630 75%, #060b18 100%);
+      color: var(--text-light);
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .vote-card {
+      background: var(--panel-bg);
+      border: 2px solid var(--gold-primary);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(236, 170, 19, 0.25);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vote-logo-box {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .vote-logo-img {
+      width: 90px;
+      height: auto;
+      max-height: 85px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(236, 170, 19, 0.35));
+    }
+
+    .badge-icon {
+      font-size: 2.2rem;
+      color: var(--gold-primary);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      letter-spacing: 2px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .edition-tag {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      color: var(--gold-amber);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .question-box {
+      background: rgba(7, 11, 28, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .question-box p {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #ffffff;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .vote-btn {
+      background: linear-gradient(180deg, #182452 0%, #0d1533 100%);
+      border: 1.5px solid rgba(138, 180, 248, 0.4);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .vote-btn:active {
+      transform: scale(0.98);
+      background: #25397d;
+      border-color: var(--gold-primary);
+    }
+
+    .opt-letter {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold-primary);
+      min-width: 26px;
+    }
+
+    .voted-success {
+      display: none;
+      background: rgba(46, 204, 113, 0.15);
+      border: 1.5px solid #2ecc71;
+      border-radius: 14px;
+      padding: 24px 18px;
+      margin-top: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .voted-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .voted-success h3 {
+      font-size: 1.2rem;
+      color: #2ecc71;
+      margin-bottom: 6px;
+    }
+
+    .voted-success p {
+      font-size: 0.9rem;
+      color: #d4f8e2;
+      line-height: 1.4;
+    }
+
+    .waiting-box {
+      padding: 30px 10px;
+      color: #a0b2d6;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid var(--accent-cyan);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .vote-theme-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+    }
+
+    .vote-theme-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    /* TEMA CLARO PARA VOTE.HTML */
+    body.theme-light {
+      background: radial-gradient(circle at 50% 25%, #edf3fc 0%, #dfe7f7 55%, #cbdcf2 100%);
+      color: #0d172e;
+    }
+    body.theme-light .vote-card {
+      background: #ffffff;
+      border-color: #c28509;
+      box-shadow: 0 10px 40px rgba(15, 30, 60, 0.12);
+    }
+    body.theme-light h1 { color: #0b152d; }
+    body.theme-light .edition-tag { color: #c28509; }
+    body.theme-light .question-box {
+      background: #f7f9fd;
+      border-color: rgba(44, 93, 158, 0.25);
+    }
+    body.theme-light .question-box p { color: #0d172e; }
+    body.theme-light .vote-btn {
+      background: #ffffff;
+      border-color: rgba(44, 93, 158, 0.25);
+      color: #0d172e;
+    }
+    body.theme-light .vote-btn:hover:not(:disabled) {
+      background: #fff8eb;
+      border-color: #c28509;
+    }
+    body.theme-light .vote-btn .opt-letter { color: #c28509; }
+    body.theme-light .waiting-box { color: #4e6282; }
+    body.theme-light .voted-success p { color: #1e8449; }
+    body.theme-light .vote-theme-btn {
+      background: #edf2f9;
+      border-color: rgba(44, 93, 158, 0.25);
+      color: #101c34;
+    }
+  </style>
+</head>
+<body>
+  <div class="vote-card" style="position: relative;">
+    <button id="vote-theme-btn" class="vote-theme-btn" title="Cambiar Tema (Claro / Oscuro)">☀️</button>
+    <div class="vote-logo-box">
+      <img src="logo.png" alt="Instituto Bíblico Ministerial" class="vote-logo-img">
+    </div>
+    <h1>AYUDA AL CONCURSANTE</h1>
+    <span class="edition-tag">INSTITUTO BÍBLICO MINISTERIAL • AUDIENCIA EN VIVO</span>
+
+    <!-- VISTA CARGANDO / ESPERANDO PREGUNTA -->
+    <div id="view-waiting" class="waiting-box">
+      <div class="spinner"></div>
+      <p id="waiting-text">Conectando con el estudio...</p>
+    </div>
+
+    <!-- VISTA FORMULARIO DE VOTACIÓN -->
+    <div id="view-voting" style="display: none;">
+      <div class="question-box">
+        <p id="q-text">Cargando pregunta...</p>
+      </div>
+
+      <div class="options-list" id="options-container">
+        <!-- Opciones A, B, C, D -->
+      </div>
+      <small style="color: #8fa0c0;">Toca la opción que creas que es correcta</small>
+    </div>
+
+    <!-- VISTA VOTO ENVIADO -->
+    <div id="view-voted" class="voted-success">
+      <div class="voted-icon">✅</div>
+      <h3>¡Tu voto ha sido registrado!</h3>
+      <p>Mira la pantalla principal para ver reflejado tu porcentaje en tiempo real junto a los demás asistentes.</p>
+    </div>
+  </div>
+
+  <script>
+    let currentToken = null;
+    let hasVotedForCurrentToken = false;
+    const letters = ["A", "B", "C", "D"];
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('audience_api.php?action=status');
+        const json = await res.json();
+
+        if (json.success && json.data.active) {
+          const poll = json.data;
+
+          // Si cambió la pregunta / token
+          if (poll.token !== currentToken) {
+            currentToken = poll.token;
+            hasVotedForCurrentToken = (localStorage.getItem('voted_' + currentToken) === 'true');
+          }
+
+          if (hasVotedForCurrentToken) {
+            document.getElementById('view-waiting').style.display = 'none';
+            document.getElementById('view-voting').style.display = 'none';
+            document.getElementById('view-voted').style.display = 'block';
+          } else {
+            document.getElementById('view-waiting').style.display = 'none';
+            document.getElementById('view-voted').style.display = 'none';
+            document.getElementById('view-voting').style.display = 'block';
+
+            document.getElementById('q-text').textContent = poll.question;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            poll.options.forEach((optText, idx) => {
+              const btn = document.createElement('button');
+              btn.className = 'vote-btn';
+              btn.innerHTML = `<span class="opt-letter">${letters[idx]}:</span> <span>${optText}</span>`;
+              btn.onclick = () => submitVote(idx);
+              container.appendChild(btn);
+            });
+          }
+        } else {
+          // No hay votación activa
+          document.getElementById('view-voting').style.display = 'none';
+          document.getElementById('view-voted').style.display = 'none';
+          document.getElementById('view-waiting').style.display = 'block';
+          document.getElementById('waiting-text').textContent = "Esperando a que el concursante solicite el comodín del público...";
+        }
+      } catch (e) {
+        document.getElementById('waiting-text').textContent = "Esperando señal del juego...";
+      }
+    }
+
+    async function submitVote(optionIndex) {
+      if (!currentToken || hasVotedForCurrentToken) return;
+
+      try {
+        const res = await fetch('audience_api.php?action=vote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ option: optionIndex, token: currentToken })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          hasVotedForCurrentToken = true;
+          localStorage.setItem('voted_' + currentToken, 'true');
+          document.getElementById('view-voting').style.display = 'none';
+          document.getElementById('view-voted').style.display = 'block';
+        } else {
+          alert(json.message || "Error al emitir voto");
+        }
+      } catch (e) {
+        alert("Error de conexión al enviar voto");
+      }
+    }
+
+    // Gestión del Tema Claro / Oscuro en votación
+    const voteThemeBtn = document.getElementById('vote-theme-btn');
+    let voteTheme = localStorage.getItem('qqm_theme') || 'dark';
+
+    function setVoteTheme(theme) {
+      voteTheme = theme;
+      if (theme === 'light') {
+        document.body.classList.add('theme-light');
+        if (voteThemeBtn) voteThemeBtn.textContent = '🌙';
+      } else {
+        document.body.classList.remove('theme-light');
+        if (voteThemeBtn) voteThemeBtn.textContent = '☀️';
+      }
+      localStorage.setItem('qqm_theme', theme);
+    }
+
+    if (voteThemeBtn) {
+      voteThemeBtn.addEventListener('click', () => {
+        setVoteTheme(voteTheme === 'light' ? 'dark' : 'light');
+      });
+    }
+    setVoteTheme(voteTheme);
+
+    // Sondeo cada 2 segundos
+    setInterval(checkStatus, 2000);
+    checkStatus();
+  </script>
+</body>
+</html>
